@@ -22,7 +22,6 @@ function Ship(len, pos) {
 }
 
 function Gameboard() {
-
   const board = [];
   for (let i =  0; i < 100; i++) {
     board.push({hasShip: false, location: undefined, isHit: false});
@@ -83,6 +82,25 @@ function Gameboard() {
     return board.every(shipIsHit);
   }
 
-
   return {board, ships, placeShip, recieveAttack, missedShots, allAreSunk}
 }
+
+function Player() {
+  const gameBoard = Gameboard();
+  function attackComputer(num) {
+    computer.gameBoard.recieveAttack(num);
+  }
+  function attackPlayer() {
+    function generate() {
+      const random = Math.floor(Math.random() * 100);
+      if (player.board[random].isHit === true) generate();
+      return random;
+    }
+    player.gameBoard.recieveAttack(generate());
+  }
+  return {gameBoard, attackComputer, attackPlayer}
+}
+
+const player = Player();
+
+const computer = Player();
