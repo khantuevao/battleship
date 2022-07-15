@@ -1,21 +1,19 @@
 export { Ship, Gameboard };
 
-function Ship(len) {
+function Ship(len, pos) {
   const length = len;
 
-  const position = [];
-  for (let i = 0; i < length; i++) {
-    position[i] = false;
-  }
+  const position = pos();
 
   function hit(num) {
-    position[num] = true;
+    const found = position.find(element => element.name === num)
+    found.isHit = true;
   }
 
   function isSunk() {
     let hits = 0;
-    position.forEach((pos) => {
-      if (pos === true) hits++;
+    position.forEach((entry) => {
+      if (entry.isHit === true) hits++;
     });
     return hits === length;
   }
@@ -24,34 +22,67 @@ function Ship(len) {
 }
 
 function Gameboard() {
-  const gameBoard = [];
+
+  const board = [];
   for (let i =  0; i < 100; i++) {
-    gameBoard.push({hasShip: false, isHit: false});
+    board.push({hasShip: false, location: undefined, isHit: false});
   }
 
+  const ships = [];
+
   function placeShip(point, axis, length) {
-    gameBoard[point].hasShip = true;
-    if (axis === 'x') {
+    const shipPosition = () => {
+      const position = [];
+      position.push({name: point, isHit: false})
       for (let i = 1; i < length; i++) {
-        gameBoard[point + i].hasShip = true;
-      } 
-    } else if (axis === 'y') {
-      for (let i = 1; i < length; i++) {
-        gameBoard[point + (i * 10)].hasShip = true;
-      } 
+        if (axis === 'x') {
+          position.push({name: (point + i), isHit: false})
+        } else if (axis === 'y') {
+          position.push({name: (point + i * 10), isHit: false})
+        }
+      }
+      return position;
+    }
+
+    const newShip = Ship(length, shipPosition);
+    ships.push(newShip);
+
+    board[point].hasShip = true;
+    board[point].location = ships.length - 1;
+    for (let i = 1; i < length; i++) {
+      if (axis === 'x') {
+        board[point + i].hasShip = true;
+        board[point + i].location = ships.length - 1;
+      } else if (axis === 'y') {
+        board[point + i * 10].hasShip = true;
+        board[point + i * 10].location = ships.length - 1;
+      }
     }
   }
 
+  const missedShots = [];
+
   function recieveAttack(num) {
-    gameBoard[num].isHit = true;
+    if (board[num].hasShip === true && board[num].isHit === false) {
+      ships[board[num].location].hit(num);
+      board[num].isHit = true;
+    } else if (board[num].hasShip === true && board[num].isHit === true) {
+      console.error('already hit');
+    } else if (board[num].hasShip === false && board[num].isHit === false) {
+      board[num].isHit = true;
+      missedShots.push(num);
+    } else if (board[num].hasShip === false && board[num].isHit === true) {
+      console.error('already hit');
+    }
   }
 
   function allAreSunk() {
     function shipIsHit(entry) {
       return (entry.hasShip === true === entry.isHit);
     }
-    return gameBoard.every(shipIsHit);
+    return board.every(shipIsHit);
   }
 
-  return {gameBoard, placeShip, recieveAttack, allAreSunk}
+
+  return {board, ships, placeShip, recieveAttack, missedShots, allAreSunk}
 }
