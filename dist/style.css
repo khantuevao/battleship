@@ -1,21 +1,34 @@
 #container {
   text-align: center;
-  border: 1px solid black;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 #row {
   display: flex;
-
+  border: 1px solid black;
+  border-bottom: none;
+}
+#row:last-child {
+  border-bottom: 1px solid black;
 }
 
 .box {
-  border: 1px solid black;
-  width: 50px;
-  height: 50px;
+  width: 35px;
+  height: 35px;
+  border-right: 1px solid black;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.box:last-child {
+  border: none;
+}
+.box:hover {
+  background-color: lightgrey;
+}
+.box:active {
+  background-color: rgb(165, 165, 165);
 }
